@@ -1,5 +1,4 @@
-
-# Restores menu bar, fixes the broken file search, and permanently kills Copilot.
+# Restores menu bar, Play button, fixes file search, permanently kills Copilot, and removes terminal tabs.
 
 # 1. Self-Elevate to Administrator
 if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
@@ -8,7 +7,7 @@ if (-not ([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdenti
     exit
 }
 
- $ErrorActionPreference = "Continue"
+$ErrorActionPreference = "Continue"
 
 Write-Host "Force killing ALL VS Code processes..." -ForegroundColor Cyan
 Get-Process -Name "Code*" -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue
@@ -23,7 +22,7 @@ code --uninstall-extension ms-vscode.inline-chat 2>&1 | Out-Null
 
 # 3. Physically Delete Copilot from User Profile (Where market extensions live)
 Write-Host "Scrubbing Copilot from user extensions..." -ForegroundColor Cyan
- $extPath = "$env:USERPROFILE\.vscode\extensions"
+$extPath = "$env:USERPROFILE\.vscode\extensions"
 if (Test-Path $extPath) {
     # Only look at top-level folders to avoid breaking other extensions
     Get-ChildItem -Path $extPath -Directory | Where-Object { 
@@ -40,12 +39,11 @@ if (Test-Path $extPath) {
 
 # 4. Overwrite settings.json with pristine, simplified ISE layout
 Write-Host "Hardcoding pristine ISE settings..." -ForegroundColor Cyan
- $settingsPath = "$env:APPDATA\Code\User\settings.json"
- $settingsDir = Split-Path $settingsPath
+$settingsPath = "$env:APPDATA\Code\User\settings.json"
+$settingsDir = Split-Path $settingsPath
 if (-not (Test-Path $settingsDir)) { New-Item -ItemType Directory -Path $settingsDir -Force | Out-Null }
 
-# Note: "window.menuBarVisibility" has been REMOVED so your menu bar comes back.
- $settingsJson = @"
+$settingsJson = @"
 {
     "workbench.startupEditor": "none",
     "workbench.welcomePage.walkthroughs.openOnInstall": false,
@@ -58,6 +56,7 @@ if (-not (Test-Path $settingsDir)) { New-Item -ItemType Directory -Path $setting
     
     "window.titleBarStyle": "native",
     "window.commandCenter": false,
+    "workbench.layoutControl.enabled": false,
     
     "editor.quickSuggestions": {
         "other": true,
@@ -90,12 +89,12 @@ if (-not (Test-Path $settingsDir)) { New-Item -ItemType Directory -Path $setting
     "git.enabled": false,
     "github.gitAuthentication": false,
     
-    "workbench.activityBar.visible": false,
+    "workbench.activityBar.location": "hidden",
     "workbench.statusBar.visible": false,
     "editor.minimap.enabled": false,
     "breadcrumbs.enabled": false,
     "workbench.editor.enablePreview": false,
-    "workbench.sideBar.visible": false,
+    "workbench.sideBar.location": "hidden",
     
     "editor.folding": false,
     "editor.glyphMargin": false,
@@ -103,14 +102,14 @@ if (-not (Test-Path $settingsDir)) { New-Item -ItemType Directory -Path $setting
     "editor.guides.bracketPairs": false,
     "editor.overviewRulerLanes": 0,
     "editor.stickyScroll.enabled": false,
-    "workbench.editor.editorActionsLocation": "hidden"
+    "terminal.integrated.tabs.enabled": false
 }
 "@
 
 [System.IO.File]::WriteAllText($settingsPath, $settingsJson, [System.Text.UTF8Encoding]::new($false))
 
 Write-Host "`nConfiguration Complete!" -ForegroundColor Green
-Write-Host "Your menu bar is back, and Copilot has been disabled via CLI and deleted from your profile." -ForegroundColor Green
+Write-Host "Your menu bar is back, the Play button is restored, terminal tabs are hidden, and Copilot has been disabled." -ForegroundColor Green
 
 Write-Host "`n--- HOW TO HIDE THE CHAT PANEL ---" -ForegroundColor Yellow
 Write-Host "If the Chat panel is still visible on the right side of your screen:" -ForegroundColor Yellow
