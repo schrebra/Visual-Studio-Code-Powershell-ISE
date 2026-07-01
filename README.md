@@ -46,7 +46,7 @@ Stops VS Code from reaching out to the internet or showing popups:
 
 ## 🛠️ How to Use
 
-1. Save the code as `VScode-PS_ISE-Config.ps1`.
+1. Save the code as `vscode-ps_ise-config.ps1`.
 2. Right-click the file and select **Run with PowerShell** (or run it from your PowerShell terminal).
 3. Click **Yes** on the User Account Control (UAC) prompt to grant Administrator access.
 4. Let the script run. It will automatically close VS Code, scrub the files, and apply the new settings.
